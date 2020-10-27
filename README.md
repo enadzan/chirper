@@ -1,2 +1,2 @@
 # chirper
-MassiveJobs demo project - toy twitter clone
+MassiveJobs.NET demo project - toy twitter clone
