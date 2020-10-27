@@ -1,3 +1,4 @@
+using Chirper.Server.Jobs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,22 @@ namespace Chirper.Server
 
             services.AddScoped<IChirpDb, EF.Repositories.ChirpDb>();
 
-            services.AddMassiveJobs();
+            services.AddMassiveJobs(options =>
+            {
+                options.RabbitMqSettings.HostNames = new[] {Configuration["RabbitMq:Hostname"]};
+                options.RabbitMqSettings.Username = Configuration.GetValue<string>("RabbitMq:Username");
+                options.RabbitMqSettings.Password = Configuration.GetValue<string>("RabbitMq:Password");
+                options.RabbitMqSettings.Port = Configuration.GetValue<int>("RabbitMq:Port");
+                options.RabbitMqSettings.VirtualHost = Configuration.GetValue<string>("RabbitMq:VirtualHost");
+                options.RabbitMqSettings.NamePrefix = Configuration.GetValue<string>("RabbitMq:NamePrefix");
+
+                // Using a custom job type provider is optional - here it is used to shorten the tag names.
+                //
+                // The DefaultTypeProvider uses complete class names. It's good to get something running quickly,
+                // but makes refactoring (renaming classes) more difficult.
+
+                options.JobTypeProvider = new CustomJobTypeProvider();
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();

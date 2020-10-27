@@ -39,7 +39,7 @@ namespace Chirper.Server.Controllers
             {
                 ChirpId = chirp.Id,
                 AuthorId = chirp.UserId
-            });
+            }, 60 * 1000); // this job may take longer if a user has a lot of followers, we allow one minute
 
             _db.CommitTransaction();
 

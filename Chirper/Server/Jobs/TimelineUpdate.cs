@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
-using MassiveJobs.Core;
+﻿using MassiveJobs.Core;
 using Chirper.Server.Repositories;
 
 namespace Chirper.Server.Jobs
 {
+    public class TimelineUpdateArgs
+    {
+        public long ChirpId { get; set; }
+        public int AuthorId { get; set; }
+    }
+
     public class TimelineUpdate: Job<TimelineUpdate, TimelineUpdateArgs>
     {
         private readonly IChirpDb _db;
@@ -16,38 +21,20 @@ namespace Chirper.Server.Jobs
         public override void Perform(TimelineUpdateArgs args)
         {
             var user = _db.Users.FindWithFollowers(args.AuthorId);
+            var chirp = _db.Chirps.Find(args.ChirpId);
 
-            var followerIds = new List<int>();
-
-            foreach (var follower in user.Followers)
+            JobBatch.Do(() =>
             {
-                followerIds.Add(follower.FollowerId);
-
-                if (followerIds.Count < 1000) continue;
-
-                FollowerTimelineUpdate.Publish(new FollowerTimelineUpdateArgs
+                foreach (var follower in user.Followers)
                 {
-                    ChirpId = args.ChirpId,
-                    FollowerIds = followerIds
-                });
-
-                followerIds = new List<int>();
-            }
-
-            if (followerIds.Count > 0)
-            {
-                FollowerTimelineUpdate.Publish(new FollowerTimelineUpdateArgs
-                {
-                    ChirpId = args.ChirpId,
-                    FollowerIds = followerIds
-                });
-            }
+                    TimelineSingleUpdate.Publish(new TimelineSingleUpdateArgs
+                    {
+                        Id = chirp.Id,
+                        Time = chirp.ChirpTimeUtc,
+                        Follower = follower.FollowerId
+                    });
+                }
+            });
         }
-    }
-
-    public class TimelineUpdateArgs
-    {
-        public long ChirpId { get; set; }
-        public int AuthorId { get; set; }
     }
 }
