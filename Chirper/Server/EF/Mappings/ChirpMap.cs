@@ -39,6 +39,10 @@ namespace Chirper.Server.EF.Mappings
             builder.Property(e => e.Score)
                 .HasColumnName("score");
 
+            builder.Property(e => e.IsTimelineSyncStarted)
+                .HasColumnName("is_timeline_sync_started")
+                .HasDefaultValue(false);
+
             builder.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)

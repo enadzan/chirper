@@ -1,4 +1,9 @@
-﻿using MassiveJobs.Core;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+using MassiveJobs.Core;
+
 using Chirper.Server.Repositories;
 
 namespace Chirper.Server.Jobs
@@ -9,7 +14,7 @@ namespace Chirper.Server.Jobs
         public int AuthorId { get; set; }
     }
 
-    public class TimelineUpdate: Job<TimelineUpdate, TimelineUpdateArgs>
+    public class TimelineUpdate: JobAsync<TimelineUpdate, TimelineUpdateArgs>
     {
         private readonly IChirpDb _db;
 
@@ -18,15 +23,21 @@ namespace Chirper.Server.Jobs
             _db = db;
         }
 
-        public override void Perform(TimelineUpdateArgs args)
+        public override Task Perform(TimelineUpdateArgs args, CancellationToken cancellationToken)
         {
-            var user = _db.Users.FindWithFollowers(args.AuthorId);
             var chirp = _db.Chirps.Find(args.ChirpId);
+            if (chirp == null) throw new Exception($"Chirp {args.ChirpId} doesn't exist");
+
+            if (chirp.IsTimelineSyncStarted) return Task.CompletedTask; // IMPORTANT: make sure we are idempotent
+
+            var user = _db.Users.FindWithFollowers(args.AuthorId);
 
             JobBatch.Do(() =>
             {
                 foreach (var follower in user.Followers)
                 {
+                    if (cancellationToken.IsCancellationRequested) break;
+
                     TimelineSingleUpdate.Publish(new TimelineSingleUpdateArgs
                     {
                         Id = chirp.Id,
@@ -35,6 +46,14 @@ namespace Chirper.Server.Jobs
                     });
                 }
             });
+
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                chirp.IsTimelineSyncStarted = true;
+                _db.SaveChanges();
+            }
+
+            return Task.CompletedTask;
         }
     }
 }

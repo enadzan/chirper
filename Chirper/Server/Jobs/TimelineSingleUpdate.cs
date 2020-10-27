@@ -25,15 +25,17 @@ namespace Chirper.Server.Jobs
 
         public override void Perform(TimelineSingleUpdateArgs args)
         {
-            var timeline = new Timeline
+            var timeline = _db.Timeline.Find(args.Follower, args.Time, args.Id);
+            if (timeline != null) return; // idempotent behavior
+
+            _db.Timeline.Add(new Timeline
             {
                 ChirpId = args.Id,
                 TimeUtc = args.Time,
                 UserId = args.Follower,
                 Score = int.MinValue
-            };
+            });
 
-            _db.Timeline.Add(timeline);
             _db.SaveChanges();
         }
     }
