@@ -14,7 +14,5 @@ namespace Chirper.Server.DomainModel
         public string Contents { get; set; }
         public long? OriginalChirpId { get; set; }
         public int Score { get; set; }
-
-        public bool IsTimelineSyncStarted { get; set; }
     }
 }

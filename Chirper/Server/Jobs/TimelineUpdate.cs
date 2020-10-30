@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 using MassiveJobs.Core;
-
 using Chirper.Server.Repositories;
 
 namespace Chirper.Server.Jobs
@@ -12,9 +8,14 @@ namespace Chirper.Server.Jobs
     {
         public long ChirpId { get; set; }
         public int AuthorId { get; set; }
+
+        /// <summary>
+        /// Last follower whose timeline was updated
+        /// </summary>
+        public int? LastFollowerId { get; set; }
     }
 
-    public class TimelineUpdate: JobAsync<TimelineUpdate, TimelineUpdateArgs>
+    public class TimelineUpdate: Job<TimelineUpdate, TimelineUpdateArgs>
     {
         private readonly IChirpDb _db;
 
@@ -23,21 +24,23 @@ namespace Chirper.Server.Jobs
             _db = db;
         }
 
-        public override Task Perform(TimelineUpdateArgs args, CancellationToken cancellationToken)
+        public override void Perform(TimelineUpdateArgs args)
         {
             var chirp = _db.Chirps.Find(args.ChirpId);
             if (chirp == null) throw new Exception($"Chirp {args.ChirpId} doesn't exist");
 
-            if (chirp.IsTimelineSyncStarted) return Task.CompletedTask; // IMPORTANT: make sure we are idempotent
+            // we are updating the followers' time lines in batches of 1000.
+            // Otherwise this job might take too long and long running jobs are bad because they block
+            // job workers from performing other jobs.
 
-            var user = _db.Users.FindWithFollowers(args.AuthorId);
+            const int batchSize = 1000;
+
+            var followers = _db.Followers.FindNextFollowers(args.AuthorId, args.LastFollowerId ?? 0, batchSize);
 
             JobBatch.Do(() =>
             {
-                foreach (var follower in user.Followers)
+                foreach (var follower in followers)
                 {
-                    if (cancellationToken.IsCancellationRequested) break;
-
                     TimelineSingleUpdate.Publish(new TimelineSingleUpdateArgs
                     {
                         Id = chirp.Id,
@@ -47,13 +50,17 @@ namespace Chirper.Server.Jobs
                 }
             });
 
-            if (!cancellationToken.IsCancellationRequested)
+            if (followers.Count == batchSize)
             {
-                chirp.IsTimelineSyncStarted = true;
-                _db.SaveChanges();
-            }
+                // possibly more followers to update, publish this same job again
 
-            return Task.CompletedTask;
+                Publish(new TimelineUpdateArgs
+                {
+                    AuthorId = args.AuthorId,
+                    ChirpId = args.ChirpId,
+                    LastFollowerId = followers[^1].FollowerId
+                });
+            }
         }
     }
 }

@@ -1,37 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
 using MassiveJobs.Core;
 
 namespace Chirper.Server.Jobs
 {
     public class CustomJobTypeProvider: IJobTypeProvider
     {
-        private const string TagTimelineUpdate = "tu";
-        private const string TagTimelineUpdateArgs = "tua";
-        private const string TagTimelineSingleUpdate = "ts";
-        private const string TagTimelineSingleUpdateArgs = "tsa";
+        private readonly Dictionary<string, Type> _tagToTypeMap = new Dictionary<string, Type>();
+        private readonly Dictionary<Type, string> _typeToTagMap = new Dictionary<Type, string>();
+
+        public CustomJobTypeProvider()
+        {
+            _tagToTypeMap["cp"] = typeof(ChirpProcessing);
+            _tagToTypeMap["hu"] = typeof(HashTagUpdate);
+
+            _tagToTypeMap["tu"] = typeof(TimelineUpdate);
+            _tagToTypeMap["tua"] = typeof(TimelineUpdateArgs);
+
+            _tagToTypeMap["ts"] = typeof(TimelineSingleUpdate);
+            _tagToTypeMap["tsa"] = typeof(TimelineSingleUpdateArgs);
+
+            _tagToTypeMap["l"] = typeof(long);
+            _tagToTypeMap["i"] = typeof(int);
+            _tagToTypeMap["s"] = typeof(string);
+
+            foreach (var kvp in _tagToTypeMap)
+            {
+                _typeToTagMap[kvp.Value] = kvp.Key;
+            }
+        }
 
         public Type TagToType(string tag)
         {
-            switch (tag)
-            {
-                case TagTimelineUpdate: return typeof(TimelineUpdate);
-                case TagTimelineUpdateArgs: return typeof(TimelineUpdateArgs);
-
-                case TagTimelineSingleUpdate: return typeof(TimelineSingleUpdate);
-                case TagTimelineSingleUpdateArgs: return typeof(TimelineSingleUpdateArgs);
-
-                default: throw new Exception("unknown tag: " + tag);
-            }
+            if (_tagToTypeMap.TryGetValue(tag, out var type)) return type;
+            throw new Exception("unknown tag: " + tag);
         }
 
         public string TypeToTag(Type type)
         {
-            if (type == typeof(TimelineUpdate)) return TagTimelineUpdate;
-            if (type == typeof(TimelineUpdateArgs)) return TagTimelineUpdateArgs;
-
-            if (type == typeof(TimelineSingleUpdate)) return TagTimelineSingleUpdate;
-            if (type == typeof(TimelineSingleUpdateArgs)) return TagTimelineSingleUpdateArgs;
-
+            if (_typeToTagMap.TryGetValue(type, out var tag)) return tag;
             throw new Exception("unsupported type: " + type.FullName);
         }
     }

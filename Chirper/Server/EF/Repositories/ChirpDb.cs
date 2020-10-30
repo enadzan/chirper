@@ -13,7 +13,9 @@ namespace Chirper.Server.EF.Repositories
 
         public IChirpUserRepository Users { get; }
         public IChirpRepository Chirps { get; }
+        public IFollowerRepository Followers { get; }
         public ITimelineRepository Timeline { get; }
+        public IHashTagRepository HashTags { get; }
 
         public ChirpDb(ChirpDbContext context)
         {
@@ -21,7 +23,9 @@ namespace Chirper.Server.EF.Repositories
 
             Users = new ChirpUserRepository(_context);
             Chirps = new ChirpRepository(_context);
+            Followers = new FollowerRepository(_context);
             Timeline = new TimelineRepository(_context);
+            HashTags = new HashTagRepository(_context);
         }
 
         public void Dispose()

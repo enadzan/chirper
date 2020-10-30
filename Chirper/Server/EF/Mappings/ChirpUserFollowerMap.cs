@@ -21,7 +21,7 @@ namespace Chirper.Server.EF.Mappings
                 .HasColumnName("follower_id");
 
             builder.HasOne(e => e.User)
-                .WithMany(e => e.Followers)
+                .WithMany()
                 .HasForeignKey(e => e.UserId)
                 .HasConstraintName("fk_chirp_user_follower_user_id");
 

@@ -6,7 +6,9 @@ namespace Chirper.Server.Repositories
     {
         IChirpUserRepository Users { get; }
         IChirpRepository Chirps { get; }
+        IFollowerRepository Followers { get; }
         ITimelineRepository Timeline { get; }
+        IHashTagRepository HashTags { get; }
 
         void SaveChanges();
 

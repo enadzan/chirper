@@ -35,11 +35,13 @@ namespace Chirper.Server.Controllers
 
             _db.SaveChanges();
 
-            TimelineUpdate.Publish(new TimelineUpdateArgs
-            {
-                ChirpId = chirp.Id,
-                AuthorId = chirp.UserId
-            }, 60 * 1000); // this job may take longer if a user has a lot of followers, we allow one minute
+            // Publish chirp processing job, before commit.
+            // If the publishing fails, the transaction will be rolled back.
+            //
+            // We're using the job publish as the last committing resource because
+            // it does not participate in the DB transaction.
+
+            ChirpProcessing.Publish(chirp.Id);
 
             _db.CommitTransaction();
 
