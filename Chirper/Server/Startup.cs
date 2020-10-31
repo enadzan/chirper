@@ -1,12 +1,14 @@
-using Chirper.Server.Jobs;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using MassiveJobs.RabbitMqBroker.Hosting;
 
+using Chirper.Server.Infrastructure;
+using Chirper.Server.Jobs;
 using Chirper.Server.Repositories;
 
 namespace Chirper.Server
@@ -28,6 +30,8 @@ namespace Chirper.Server
             {
                 options.UseSqlServer(Configuration.GetConnectionString("ChirpDb"));
             });
+
+            services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 
             services.AddScoped<IChirpDb, EF.Repositories.ChirpDb>();
 

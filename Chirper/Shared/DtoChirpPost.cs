@@ -4,11 +4,9 @@ namespace Chirper.Shared
 {
     public class DtoChirpPost
     {
-        [Required]
-        [MinLength(10)]
-        [MaxLength(100)]
+        [Required(ErrorMessage = "Please enter the chirp contents.")]
+        [MinLength(10, ErrorMessage = "Chirp contents must have at least 10 letters.")]
+        [MaxLength(100, ErrorMessage = "Chirp contents cannot have more than 100 letters.")]
         public string Contents { get; set; }
-
-        public long? OriginalChirpId { get; set; }
     }
 }
