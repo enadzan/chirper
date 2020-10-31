@@ -15,5 +15,11 @@ namespace Chirper.Server.EF.Repositories
             return Context.Set<ChirpUser>()
                 .Any(u => u.Username == username);
         }
+
+        public ChirpUser FindByUsername(string username)
+        {
+            return Context.Set<ChirpUser>()
+                .FirstOrDefault(u => u.Username == username);
+        }
     }
 }

@@ -20,6 +20,7 @@ namespace Chirper.Server.Controllers
             _passwordHasher = passwordHasher;
         }
 
+        [HttpPost]
         public IActionResult Post(DtoUserRegister dto)
         {
             if (_db.Users.UserExists(dto.Username))
@@ -39,6 +40,21 @@ namespace Chirper.Server.Controllers
             _db.Users.Add(user);
 
             _db.SaveChanges();
+
+            return Ok(user.Id);
+        }
+
+        [HttpPost]
+        [Route("login")]
+        public IActionResult Login(DtoUserLogin dto)
+        {
+            var user = _db.Users.FindByUsername(dto.Username);
+
+            if (user == null || !_passwordHasher.VerifyPassword(dto.Password, user.Password))
+            {
+                ModelState.AddModelError("", "Incorrect username or password");
+                return BadRequest(ModelState);
+            }
 
             return Ok(user.Id);
         }
