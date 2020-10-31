@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 
+using MassiveJobs.Core;
+
 using Chirper.Shared;
 using Chirper.Server.DomainModel;
 using Chirper.Server.Repositories;
@@ -41,7 +43,17 @@ namespace Chirper.Server.Controllers
             // We're using the job publish as the last committing resource because
             // it does not participate in the DB transaction.
 
-            ChirpProcessing.Publish(chirp.Id);
+            JobBatch.Do(() =>
+            {
+                TimelineUpdate.Publish(new TimelineUpdateArgs
+                {
+                    ChirpId = chirp.Id,
+                    AuthorId = chirp.UserId,
+                    TimeUtc = chirp.ChirpTimeUtc
+                });
+
+                HashTagUpdate.Publish(chirp.Id);
+            });
 
             _db.CommitTransaction();
 

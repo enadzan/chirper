@@ -9,7 +9,5 @@ namespace Chirper.Server.Repositories
     {
         Timeline Find(int userId, DateTime timeUtc, long chirpId);
         List<Timeline> FindByTime(int userId, DateTime fromUtc, DateTime toUtc, long? afterChirpId, int batchSize);
-
-        void Reset(int userId, DateTime fromUtc, DateTime toUtc);
     }
 }

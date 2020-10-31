@@ -23,9 +23,6 @@ namespace Chirper.Server.EF.Mappings
             builder.Property(e => e.ChirpId)
                 .HasColumnName("chirp_id");
 
-            builder.Property(e => e.Score)
-                .HasColumnName("score");
-
             builder.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)

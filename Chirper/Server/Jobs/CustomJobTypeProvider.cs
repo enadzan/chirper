@@ -11,14 +11,10 @@ namespace Chirper.Server.Jobs
 
         public CustomJobTypeProvider()
         {
-            _tagToTypeMap["cp"] = typeof(ChirpProcessing);
             _tagToTypeMap["hu"] = typeof(HashTagUpdate);
 
             _tagToTypeMap["tu"] = typeof(TimelineUpdate);
             _tagToTypeMap["tua"] = typeof(TimelineUpdateArgs);
-
-            _tagToTypeMap["ts"] = typeof(TimelineSingleUpdate);
-            _tagToTypeMap["tsa"] = typeof(TimelineSingleUpdateArgs);
 
             _tagToTypeMap["l"] = typeof(long);
             _tagToTypeMap["i"] = typeof(int);

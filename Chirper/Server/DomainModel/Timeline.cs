@@ -11,7 +11,5 @@ namespace Chirper.Server.DomainModel
 
         public long ChirpId { get; set; }
         public Chirp Chirp { get; set; }
-
-        public int Score { get; set; }
     }
 }
