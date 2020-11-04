@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 using Chirper.Server.DomainModel;
 using Chirper.Server.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Chirper.Server.EF.Repositories
 {
@@ -38,14 +38,13 @@ WHERE uf.user_id = {userId}
     AND uf.follower_id <= {toFollowerInclusive}
 ");
             }
-            catch (DbException ex)
+            catch (SqlException ex)
             {
-                if (ex.ErrorCode == 2627) // primary key violation, means it's already done
-                {
-                    return 0;
-                }
+                // if this is not PK violation throw
+                if (ex.Number != 2627) throw;
 
-                throw;
+                // otherwise, it means this has already be done
+                return 0;
             }
         }
     }
