@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
+
 using Chirper.Server.DomainModel;
 using Chirper.Server.Repositories;
 
@@ -20,6 +22,17 @@ namespace Chirper.Server.EF.Repositories
         {
             return Context.Set<ChirpUser>()
                 .FirstOrDefault(u => u.Username == username);
+        }
+
+        public ChirpUser FindByUsernameNormalized(string usernameNormalized)
+        {
+            return Context.Set<ChirpUser>()
+                .FirstOrDefault(u => u.UsernameNormalized == usernameNormalized);
+        }
+
+        public bool MarkDeleted(int userId)
+        {
+            return Context.Database.ExecuteSqlInterpolated($"DELETE FROM chirp_user WHERE id = {userId}") > 0;
         }
     }
 }

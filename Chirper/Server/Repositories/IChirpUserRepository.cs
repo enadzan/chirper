@@ -6,5 +6,8 @@ namespace Chirper.Server.Repositories
     {
         bool UserExists(string username);
         ChirpUser FindByUsername(string username);
+        ChirpUser FindByUsernameNormalized(string usernameNormalized);
+
+        bool MarkDeleted(int userId);
     }
 }

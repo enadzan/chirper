@@ -1,5 +1,7 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +9,9 @@ using Microsoft.Extensions.Hosting;
 
 using MassiveJobs.RabbitMqBroker.Hosting;
 
+using Chirper.Server.DomainModel;
 using Chirper.Server.Infrastructure;
+using Chirper.Server.Infrastructure.Identity;
 using Chirper.Server.Jobs;
 using Chirper.Server.Repositories;
 
@@ -31,6 +35,14 @@ namespace Chirper.Server
                 options.UseSqlServer(Configuration.GetConnectionString("ChirpDb"));
             });
 
+            services.AddIdentity<ChirpUser, ChirperIdentityRole>()
+                .AddDefaultTokenProviders();
+
+            services.AddTransient<IUserStore<ChirpUser>, ChirperUserStore>();
+            services.AddTransient<IUserPasswordStore<ChirpUser>, ChirperUserStore>();
+            services.AddTransient<IUserSecurityStampStore<ChirpUser>, ChirperUserStore>();
+            services.AddTransient<IRoleStore<ChirperIdentityRole>, ChirperRoleStore>();
+
             services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 
             services.AddScoped<IChirpDb, EF.Repositories.ChirpDb>();
@@ -50,6 +62,17 @@ namespace Chirper.Server
                 // but makes refactoring (renaming classes) more difficult.
 
                 options.JobTypeProvider = new CustomJobTypeProvider();
+            });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.SlidingExpiration = true;
             });
 
             services.AddControllersWithViews();
@@ -76,6 +99,9 @@ namespace Chirper.Server
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

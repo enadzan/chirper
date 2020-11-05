@@ -20,17 +20,26 @@ namespace Chirper.Server.EF.Mappings
 
             builder.Property(e => e.Username)
                 .HasColumnName("username")
-                .HasMaxLength(100)
+                .HasMaxLength(255)
                 .IsRequired();
+
+            builder.Property(e => e.UsernameNormalized)
+                .HasColumnName("username_normalized")
+                .HasMaxLength(255)
+                .IsRequired();
+
+            builder.Property(e => e.SecurityStamp)
+                .HasColumnName("security_stamp")
+                .HasMaxLength(255);
 
             builder.Property(e => e.Password)
                 .HasColumnName("password")
-                .HasMaxLength(100)
+                .HasMaxLength(255)
                 .IsRequired();
 
-            builder.HasIndex(e => e.Username)
+            builder.HasIndex(e => e.UsernameNormalized)
                 .IsUnique()
-                .HasName("uq_chirp_user_username");
+                .HasName("uq_chirp_user_username_normalized");
         }
     }
 }
