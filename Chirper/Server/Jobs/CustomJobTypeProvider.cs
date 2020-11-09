@@ -16,9 +16,12 @@ namespace Chirper.Server.Jobs
             _tagToTypeMap["tu"] = typeof(TimelineUpdate);
             _tagToTypeMap["tua"] = typeof(TimelineUpdateArgs);
 
+            _tagToTypeMap["tp"] = typeof(TestPeriodicJob);
+
             _tagToTypeMap["l"] = typeof(long);
             _tagToTypeMap["i"] = typeof(int);
             _tagToTypeMap["s"] = typeof(string);
+            _tagToTypeMap["v"] = typeof(VoidArgs);
 
             foreach (var kvp in _tagToTypeMap)
             {
