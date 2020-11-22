@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chirper.Server", "Chirper\Server\Chirper.Server.csproj", "{C16AFBCF-B1F0-4E01-B510-A023CC683331}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chirper.Server", "Chirper\Server\Chirper.Server.csproj", "{C16AFBCF-B1F0-4E01-B510-A023CC683331}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chirper.Client", "Chirper\Client\Chirper.Client.csproj", "{0B229889-C203-411B-BAEC-AD98B3DC42AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chirper.Client", "Chirper\Client\Chirper.Client.csproj", "{0B229889-C203-411B-BAEC-AD98B3DC42AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chirper.Shared", "Chirper\Shared\Chirper.Shared.csproj", "{C77CDCF7-B308-4A8A-960E-0315B458FF5C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chirper.Shared", "Chirper\Shared\Chirper.Shared.csproj", "{C77CDCF7-B308-4A8A-960E-0315B458FF5C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

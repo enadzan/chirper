@@ -1,4 +1,5 @@
 using System;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +38,12 @@ namespace Chirper.Server
 
             services.AddIdentity<ChirpUser, ChirperIdentityRole>()
                 .AddDefaultTokenProviders();
+
+            services.AddIdentityServer() 
+                .AddApiAuthorization<ChirpUser, EF.ChirpDbContext>();
+
+            services.AddAuthentication()
+                .AddIdentityServerJwt();
 
             services.AddTransient<IUserStore<ChirpUser>, ChirperUserStore>();
             services.AddTransient<IUserPasswordStore<ChirpUser>, ChirperUserStore>();
@@ -100,6 +107,7 @@ namespace Chirper.Server
 
             app.UseRouting();
 
+            app.UseIdentityServer();
             app.UseAuthentication();
             app.UseAuthorization();
 

@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Reflection;
+using System.Threading.Tasks;
+using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.EntityFramework.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Chirper.Server.EF
 {
-    public class ChirpDbContext: DbContext
+    public class ChirpDbContext: DbContext, IPersistedGrantDbContext
     {
+        public DbSet<PersistedGrant> PersistedGrants { get; set; }
+        public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
+
         public ChirpDbContext(DbContextOptions<ChirpDbContext> options): base(options)
         {
         }
@@ -46,6 +52,11 @@ namespace Chirper.Server.EF
                     }
                 }
             }
+        }
+
+        public Task<int> SaveChangesAsync()
+        {
+            return base.SaveChangesAsync();
         }
     }
 }

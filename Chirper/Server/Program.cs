@@ -25,7 +25,7 @@ namespace Chirper.Server
 
         private static void PublishPeriodicJobs()
         {
-            TestPeriodicJob.PublishPeriodic("test", 5);
+            TestPeriodicJob.CancelPeriodic("test");
         }
     }
 }
