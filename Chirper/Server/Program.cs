@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-using MassiveJobs.Core.Hosting;
-using Chirper.Server.Jobs;
-
 namespace Chirper.Server
 {
     public class Program
@@ -12,7 +9,6 @@ namespace Chirper.Server
         {
             CreateHostBuilder(args)
                 .Build()
-                .InitMassiveJobs(PublishPeriodicJobs)
                 .Run();
         }
 
@@ -22,10 +18,5 @@ namespace Chirper.Server
                 {
                     webBuilder.UseStartup<Startup>();
                 });
-
-        private static void PublishPeriodicJobs()
-        {
-            TestPeriodicJob.CancelPeriodic("test");
-        }
     }
 }

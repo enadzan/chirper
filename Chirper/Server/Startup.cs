@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+using MassiveJobs.Core;
+using MassiveJobs.Core.Hosting;
 using MassiveJobs.RabbitMqBroker.Hosting;
 
 using Chirper.Server.DomainModel;
@@ -54,22 +56,30 @@ namespace Chirper.Server
 
             services.AddScoped<IChirpDb, EF.Repositories.ChirpDb>();
 
-            services.AddMassiveJobs(options =>
-            {
-                options.RabbitMqSettings.HostNames = new[] {Configuration["RabbitMq:Hostname"]};
-                options.RabbitMqSettings.Username = Configuration.GetValue<string>("RabbitMq:Username");
-                options.RabbitMqSettings.Password = Configuration.GetValue<string>("RabbitMq:Password");
-                options.RabbitMqSettings.Port = Configuration.GetValue<int>("RabbitMq:Port");
-                options.RabbitMqSettings.VirtualHost = Configuration.GetValue<string>("RabbitMq:VirtualHost");
-                options.RabbitMqSettings.NamePrefix = Configuration.GetValue<string>("RabbitMq:NamePrefix");
+            // Using a custom job type provider is optional - here it is used to shorten the tag names.
+            //
+            // The DefaultTypeProvider uses complete class names. It's good to get something running quickly,
+            // but makes refactoring (renaming classes) more difficult.
+            services.AddSingleton<IJobTypeProvider, CustomJobTypeProvider>();
 
-                // Using a custom job type provider is optional - here it is used to shorten the tag names.
-                //
-                // The DefaultTypeProvider uses complete class names. It's good to get something running quickly,
-                // but makes refactoring (renaming classes) more difficult.
-
-                options.JobTypeProvider = new CustomJobTypeProvider();
-            });
+            services.AddMassiveJobs(o =>
+                {
+                    o.MassiveJobsSettings = new MassiveJobsSettings(
+                        Configuration.GetValue<string>("MassiveJobs:NamePrefix")
+                    );
+                    o.OnInitAction = () =>
+                    {
+                        TestPeriodicJob.PublishPeriodic("test_periodic", 10);
+                    };
+                })
+                .UseRabbitMqBroker(s =>
+                {
+                    s.HostNames = new[] {Configuration["MassiveJobs:RabbitMq:Hostname"]};
+                    s.Username = Configuration.GetValue<string>("MassiveJobs:RabbitMq:Username");
+                    s.Password = Configuration.GetValue<string>("MassiveJobs:RabbitMq:Password");
+                    s.Port = Configuration.GetValue<int>("MassiveJobs:RabbitMq:Port");
+                    s.VirtualHost = Configuration.GetValue<string>("MassiveJobs:RabbitMq:VirtualHost");
+                });
 
             services.ConfigureApplicationCookie(options =>
             {
